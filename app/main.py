@@ -55,13 +55,13 @@ def get_object_result(object_id_str: str):
     # SQL query
     if object_id:
         query_object_result = ("SELECT id, name, probability, image_path, "
-                               "       position_top, position_right, position, bottom, position_left "
+                               "       position_top, position_right, position_bottom, position_left "
                                "FROM object "
                                "WHERE id=%(object_id)s "
                                "LIMIT 1;")
     else:
         query_object_result = ("SELECT id, name, probability, image_path, "
-                               "       position_top, position_right, position, bottom, position_left "
+                               "       position_top, position_right, position_bottom, position_left "
                                "FROM object "
                                "ORDER BY id DESC "
                                "LIMIT 1;")
