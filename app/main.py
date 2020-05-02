@@ -1,6 +1,7 @@
 # fastapi
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from starlette.middleware.cors import CORSMiddleware
+from pydantic import BaseModel, AnyUrl
 
 # SQL
 import mysql.connector
@@ -37,12 +38,32 @@ def image_to_data_uri(img):
     return data_uri_string
 
 
-# initialize FastAPI
+# Initialize FastAPI
 app = FastAPI()
 app.add_middleware(CORSMiddleware, allow_origins=['*'])
 
 
-@app.get("/_api/object/{object_id_str}")
+class PositionModel(BaseModel):
+    top: int
+    right: int
+    bottom: int
+    left: int
+
+
+class ImageModel(BaseModel):
+    path: AnyUrl
+    data_uri: str
+
+
+class ObjectModel(BaseModel):
+    id: int
+    name: str
+    probability: float
+    position: PositionModel
+    image: ImageModel
+
+
+@app.get("/_api/object/{object_id_str}", response_model=ObjectModel)
 def get_object_result(object_id_str: str):
 
     # Path parameter condition
@@ -79,6 +100,10 @@ def get_object_result(object_id_str: str):
     # Close connection
     cnx.close()
 
+    if object_result_row is None:
+        raise HTTPException(
+            status_code=404, detail="Specified object was not found")
+
     # Get image
     object_image = Image.open(s3.get_file_stream(
         object_result_row['image_path']))
@@ -99,15 +124,16 @@ def get_object_result(object_id_str: str):
 
     return {
         'id': object_result_row['id'],
-        'result': {
-            'name': object_result_row['name'],
-            'probability': object_result_row['probability'],
-            'position': {
-                'top': object_result_row['position_top'],
-                'right': object_result_row['position_right'],
-                'bottom': object_result_row['position_bottom'],
-                'left': object_result_row['position_left'],
-            }
+        'name': object_result_row['name'],
+        'probability': object_result_row['probability'],
+        'position': {
+            'top': object_result_row['position_top'],
+            'right': object_result_row['position_right'],
+            'bottom': object_result_row['position_bottom'],
+            'left': object_result_row['position_left'],
         },
-        'image_path': object_result_row['image_path'],
-        'image_data_uri': image_to_data_uri(object_image)}
+        'image': {
+            'path': object_result_row['image_path'],
+            'data_uri': image_to_data_uri(object_image)
+        }
+    }
