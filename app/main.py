@@ -100,6 +100,7 @@ def get_object_result(object_id_str: str):
     # Close connection
     cnx.close()
 
+    # Return 404 if result not found
     if object_result_row is None:
         raise HTTPException(
             status_code=404, detail="Specified object was not found")
