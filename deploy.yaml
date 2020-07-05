@@ -22,10 +22,10 @@ spec:
               valueFrom:
                 configMapKeyRef:
                   key: MYSQL_PASS
-                  name: mysql-slave-connections
+                  name: mysql-connections
           envFrom:
             - configMapRef:
-                name: mysql-slave-connections
+                name: mysql-connections
             - configMapRef:
                 name: s3-endpoint
             - configMapRef:
