@@ -1,4 +1,4 @@
 fastapi==0.54.1
 mysql-connector-python==8.0.19
 boto3==1.13.0
-Pillow==7.1.2
+Pillow==8.1.1
